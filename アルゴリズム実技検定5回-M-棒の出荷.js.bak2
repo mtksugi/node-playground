@@ -13,14 +13,10 @@ ex. 3
 13 10000000000
 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000
 
-ex. 3
-13 100
-10 10 10 10 10 10 10 10 10 10 10 10 10
-
-bak2からの更新
-中身を尺取り方で解く
+とりあえず解説にあるdpの考えはよくわからないが、2分探索はわかるのでやってみる
 
 答えを2分探索する.  
+判定条件はa以上b以下を満たす（最大の）xが存在するかどうか.  （←”最大の”は上限を条件に切っていくということ）
 
 下限であるaを外側で2分探索しつつ、
 ...ex. 1なら
@@ -29,16 +25,14 @@ bak2からの更新
 3回目: 6～7→ok
 4回目: 7→ok
 
-dp[i: 0~N（切り込み場所を表す）]: 長さがa以上b以下となる切り込みを入れられる場所をtrue
-左から順に見ていくときに、i=0を見て、i=3のところで合計が5、i=4のところで合計が10だとすると、dp[i: 0, 3, 4]をtrueとする
-長さを算出は尺取り方を使う
+上限もLから半減させていく
+...ex. 1の5～Lのときに
+1回目: 5～L→NG
+2回目: 5～L/2→NG
+3回目: 5～L/4→OK
 
-2分探索で5~Lとするとき、上限Lで尺取り方をする
-dp[i: 0]を埋めたら次の探索は次にdp[i]=trueとなる場所から始める
 
-dp[N: (最後)]がtrueなら判定を満たすとする
-
-こうすれば少なくともO(log(N)*N)になるはず
+こうすれば少なくともO(log(N)*log(L))になるはず
 */
 
 const inputStr = `13 10000000000
@@ -59,34 +53,30 @@ console.log('A', A);
 
 
 const check = (min) => {
-  let dp = new Array(N + 1)
-  dp.fill(false)
+  let le = L
+  let ok = false
 
-  let l = 0
-  let r = 0
-  let ll = 0
-  while(l < N) {
-
-    while (r < N) {
-      if (ll + A[r] > L) break
-      ll += A[r]
-      if (ll >= min) {
-        dp[r + 1] = true
+  while (true) {
+    
+    let ll = 0
+    for (let j = 0; j < A.length; j++) {
+      
+      if (ll + A[j] >= le ) {
+        ll = 0
       }
-      r++
-    }
-    if (dp[N]) return true
-    for (let i = l + 1; i <= r; i++) {
-      ll -= A[i - 1]
-      if (dp[i]) {
-        l = i
-        break
+      ll += A[j]
+      if (ll >= min ) {
+        ok = true
+      } else {
+        ok = false
       }
     }
-    if (ll === 0 && r === N) break
+    if (ok) break
+    if (min + 1 >= le) break
+
+    le = Math.floor((min + le) / 2)
   }
-
-  return false
+  return ok
 }
 
 let s = 0
